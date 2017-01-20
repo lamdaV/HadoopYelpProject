@@ -26,6 +26,7 @@
 ### Milestone 02:
   - Runzhi:
     - [ ] Begin working with Hive reaggregation of review score.
+    - [ ] Partition Tables properly.
   - Adam:
     - [ ] Begin working on feature 2: find the average ratings for all the businesses in each city over a given time interval.
   - David:
