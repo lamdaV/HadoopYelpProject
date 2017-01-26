@@ -6,10 +6,10 @@ REGISTER 'hdfs:///tmp/jars/elephant-bird-pig-4.1.jar';
 REGISTER 'hdfs:///tmp/jars/json-simple-1.1.1.jar';
 yelp = LOAD '$input' using com.twitter.elephantbird.pig.load.JsonLoader('-nestedLoad') as (json:map[]);
 desiredData = FOREACH yelp GENERATE
-  (chararray) json#'review_id' AS reviewID,
-  (chararray) json#'user_id' AS userID,
-  (chararray) json#'business_id' AS businessID,
-  (chararray) json#'text' AS text,
-  (double) json#'stars' AS rating,
-  (chararray) json#'date' AS date;
+  (chararray) TRIM(json#'review_id') AS reviewID,
+  (chararray) TRIM(json#'user_id') AS userID,
+  (chararray) TRIM(json#'business_id') AS businessID,
+  (chararray) TRIM(json#'text') AS text,
+  (double) TRIM(json#'stars') AS rating,
+  (chararray) TRIM(json#'date') AS date;
 STORE desiredData into '$output' using PigStorage('\t');
