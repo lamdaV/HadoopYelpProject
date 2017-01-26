@@ -12,14 +12,14 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 public class ScaleReview extends UDF {
-	public DoubleWritable evaluate(DoubleWritable score, Text date) throws ParseException {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		DateTime reviewDate = new DateTime(df.parse(date.toString()));
+	public DoubleWritable evaluate(double score, Date date) throws ParseException {
+//		DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+//		DateTime reviewDate = new DateTime(df.parse(date.toString()));
+		
+		DateTime reviewDate = new DateTime(date);
 		DateTime currentDate = new DateTime(new Date());
-
 		double scaleFactor = (double) Days.daysBetween(reviewDate, currentDate).getDays() / 100.0;
-		double scoreValue = score.get();
 
-		return new DoubleWritable(scaleFactor * scoreValue);
+		return new DoubleWritable(scaleFactor * score);
 	}
 }
