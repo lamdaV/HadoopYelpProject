@@ -16,4 +16,6 @@ desiredData = FOREACH yelp GENERATE
   (double) TRIM(json#'stars') AS rating,
   (int) TRIM(json#'review_count') AS ratingCount;
 
-STORE desiredData into '$output' using PigStorage('\t');
+nonNullData = FILTER desiredData BY (businessID IS NOT NULL AND name IS NOT NULL AND city IS NOT NULL AND state IS NOT NULL AND longitude IS NOT NULL AND latitude IS NOT NULL AND rating IS NOT NULL AND ratingCount IS NOT NULL);
+
+STORE nonNullData into '$output' using PigStorage('\t');
