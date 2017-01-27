@@ -25,9 +25,14 @@
 
 ### Milestone 02:
   - Runzhi:
-    - [ ] Begin working with Hive reaggregation of review score.
+    - [x] Begin working with Hive reaggregation of review score.
     - [ ] Partition Tables properly.
   - Adam:
     - [ ] Begin working on feature 2: find the average ratings for all the businesses in each city over a given time interval.
   - David:
-    - [x] Begin working with Hive data to reaggregate review score with weightings.
+    - ** Proposed:**
+      - [x] Begin working with Hive data to reaggregate review score with weightings.
+    - ** Extras:**
+      - [x] Reworked logistics of review score reaggregation.
+      - [x] Finished UDF for Hive review score reaggregation
+      - [x] Updated Pig Scripts to remove rows with any null.
