@@ -17,7 +17,7 @@ GROUP BY scale_table.business_id;
 
 CREATE TEMPORARY TABLE IF NOT EXISTS `yelp.temp_business` ( business_id STRING, name STRING, city STRING, state STRING, scaleScore DOUBLE) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS orc;
 
--- sort reviews by state, city then top reviews 
+-- sort reviews by state, city then top reviews use tempory table 
 insert into TABLE `yelp.temp_business` SELECT b.business_id, b.name, b.city, b.state, r.scaleScore from BusinessStatic as b join  temp_review as r on b.business_id = r.business_id Order by b.state ASC, r.scaleScore DESC;
 
 select scaleReview(rating, cast(review_time as string))
