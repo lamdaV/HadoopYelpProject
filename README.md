@@ -30,4 +30,4 @@
   - Adam:
     - [ ] Begin working on feature 2: find the average ratings for all the businesses in each city over a given time interval.
   - David:
-    - [ ] Begin working with Hive data to reaggregate review score with weightings.
+    - [x] Begin working with Hive data to reaggregate review score with weightings.
