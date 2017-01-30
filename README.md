@@ -29,9 +29,9 @@
   - Adam:
     - [x] Begin working on feature 2: find the average ratings for all the businesses in each city over a given time interval.
   - David:
-    - ** Proposed:**
+    - **Proposed:**
       - [x] Begin working with Hive data to reaggregate review score with weightings.
-    - ** Extras:**
+    - **Extras:**
       - [x] Reworked logistics of review score reaggregation.
       - [x] Finished UDF for Hive review score reaggregation
       - [x] Updated Pig Scripts to remove rows with any null.
