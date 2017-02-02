@@ -23,19 +23,22 @@ def main():
     for line in sys.stdin:
         review_text = line.strip()
 
-        # Compute a good number of sentence to limit the summary by.
-        sentence_limit = max(len(review_text) // CHARACTERS_PER_SENTENCE, 5)
+        try:
+            # Compute a good number of sentence to limit the summary by.
+            sentence_limit = max(len(review_text) // CHARACTERS_PER_SENTENCE, 5)
 
-        # Parse the review_text and get the summary.
-        parser = PlaintextParser.from_string(review_text, Tokenizer(LANGUAGE))
-        summary = summarizer(parser.document, 4)
+            # Parse the review_text and get the summary.
+            parser = PlaintextParser.from_string(review_text, Tokenizer(LANGUAGE))
+            summary = summarizer(parser.document, 4)
 
-        # Output the summary to stdout.
-        output = []
-        for sentence in summary:
-            output.append(str(sentence) + " ")
+            # Output the summary to stdout.
+            output = ""
+            for sentence in summary:
+                output += str(sentence) + " "
 
-        print("".join(output))
+            print(output)
+        except (Exception):
+            print(review_text)
 
 
 if __name__ == "__main__":
