@@ -1,3 +1,5 @@
+hadoop fs -put -f streamingSumy.py /tmp/reviewSummarizer
+
 scp streamingSumy.py root@hadoop-24:
 scp streamingSumy.py root@hadoop-25:
 scp streamingSumy.py root@hadoop-26:

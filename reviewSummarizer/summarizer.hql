@@ -2,7 +2,7 @@ USE yelp;
 
 ADD FILE hdfs:///tmp/reviewSummarizer/streamingSumy.py;
 
-SELECT TRANSFORM (text)
-  USING 'python streamingSumy.py' as (text)
+SELECT TRANSFORM (review)
+  USING 'python streamingSumy.py' as (review)
 FROM ReviewStatic
-WHERE text IS NOT NULL;
+WHERE review IS NOT NULL;
