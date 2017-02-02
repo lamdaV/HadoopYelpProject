@@ -15,20 +15,20 @@ Create EXTERNAL TABLE BusinessStatic(
 	latitude DOUBLE,
 	rating DOUBLE,
 	ratingCount INT
-) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' 
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
 STORED AS TEXTFILE
 LOCATION '/tmp/pig/nonNullBusiness';
 
 
 Create EXTERNAL TABLE reviewstatic(
-	reviewId STRING,
+	review_id STRING,
 	user_id STRING,
 	business_id STRING,
-	text STRING,
+	review STRING,
 	rating DOUBLE,
 	review_time DATE
-) 
-ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' 
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
 STORED AS TEXTFILE
 LOCATION '/tmp/pig/nonNullReview';
 
@@ -42,12 +42,12 @@ Create TABLE Business
 	latitude DOUBLE,
 	rating DOUBLE,
 	ratingCount INT
-) 
-Partitioned by 
-( 
+)
+Partitioned by
+(
 	state STRING,
 	city STRING
-) 
+)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS orc;
 
 
@@ -58,10 +58,10 @@ ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS orc;
 --  	text STRING,
 --  	rating DOUBLE,
 --  	review_time DATE
---  ) 
--- Partitioned by 
--- (business_id STRING) 
--- ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' 
+--  )
+-- Partitioned by
+-- (business_id STRING)
+-- ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
 -- STORED AS orc;
 
 set hive.exec.reducers.bytes.per.reducer=1000;
