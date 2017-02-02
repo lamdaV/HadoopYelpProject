@@ -38,10 +38,13 @@
 
 ### Milestone 03:
    - Runzhi:
-     - [ ] Start feature 4: We want to find a leaderboard of active users within a given time interval.
+     - [x] Start feature 4: We want to find a leaderboard of active users within a given time interval.
    - Adam:
      - [ ] Finish feature 2: find the average ratings for all the businesses in each city over a given time interval.
      - [ ] Start feature 3: We want to find the highest rated business over a given time interval.
    - David:
-     - [ ] Investigate Geo-fencing for Feature 5: We want, for the above two features, to specify specific features of the types of businesses to be analyzed (like distance from a location, city location, type of business, etc).
-     - [ ] Start on feature 6: We want to summarize large reviews with 500 characters or more with Sumy python library.
+     - **Proposed:**
+       - [x] Investigate Geo-fencing for Feature 5: We want, for the above two features, to specify specific features of the types of businesses to be analyzed (like distance from a location, city location, type of business, etc).
+       - [x] Start on feature 6: We want to summarize large reviews with 500 characters or more with Sumy python library.
+     - **Extras:**
+       - [x] Complete feature 6: We want to summarize large reviews with 500 characters or more with Sumy python library. 
