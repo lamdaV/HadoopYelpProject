@@ -24,7 +24,7 @@ FROM (SELECT b.business_id AS business_id, scaleReview(r.rating, cast(r.review_t
   WHERE b.business_id == r.business_id
     AND r.review_time IS NOT NULL
   ) AS scale_table
-WHERE scale_table.scale_score != -1 and r.reviews_time >= '2012-5-11' and r.review_time <= NOW()
+WHERE scale_table.scale_score != -1 and r.reviews_time between '2012-5-11' and NOW()
 GROUP BY scale_table.business_id;
 
 CREATE TEMPORARY TABLE IF NOT EXISTS `yelp.temp_business` (business_id STRING, name STRING, city STRING, state STRING, scaleScore DOUBLE)
@@ -41,7 +41,6 @@ from BusinessStatic as b join  temp_review as r on b.business_id = r.business_id
 -- where business_id == 'iHmfkYeEsIxbAqEj3dloQQ'
 -- 	and review_time IS NOT NULL;
 
-#!/bin/bash
 drop table if exists csv_dump;
 create table csv_dump ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' LOCATION '/tmp/aggregate' as select * from temp_business;
 
