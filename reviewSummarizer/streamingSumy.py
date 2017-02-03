@@ -21,24 +21,26 @@ def main():
     summarizer.stop_words = get_stop_words(LANGUAGE)
 
     for line in sys.stdin:
-        review_text = line.strip()
+        review_id, review_text = line.strip().split("\t")
 
         try:
             # Compute a good number of sentence to limit the summary by.
-            sentence_limit = max(len(review_text) // CHARACTERS_PER_SENTENCE, 5)
+            sentence_limit = max(len(review_text) //
+                                 CHARACTERS_PER_SENTENCE, 5)
 
             # Parse the review_text and get the summary.
-            parser = PlaintextParser.from_string(review_text, Tokenizer(LANGUAGE))
+            parser = PlaintextParser.from_string(
+                review_text, Tokenizer(LANGUAGE))
             summary = summarizer(parser.document, 4)
 
             # Output the summary to stdout.
-            output = ""
+            output = review_id + "\t"
             for sentence in summary:
                 output += str(sentence) + " "
 
             print(output)
         except (Exception):
-            print(review_text)
+            print(review_id + "\t" + review_text)
 
 
 if __name__ == "__main__":
