@@ -6,7 +6,8 @@ CREATE FUNCTION scaleReview AS 'edu.rosehulman.rad.ScaleReview' USING JAR 'hdfs:
 CREATE TEMPORARY TABLE IF NOT EXISTS `yelp.temp_review` (business_id STRING, scaleScore DOUBLE)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS orc;
 
-insert into TABLE `yelp.temp_review` SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
+insert into TABLE `yelp.temp_review`
+SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
 FROM (SELECT b.business_id AS business_id, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
   FROM BusinessStatic AS b, ReviewStatic AS r
   WHERE b.business_id == r.business_id
@@ -16,7 +17,8 @@ WHERE scale_table.scale_score != -1
 GROUP BY scale_table.business_id;
 
 --select based on dates
-insert into TABLE `yelp.temp_review` SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
+insert into TABLE `yelp.temp_review`
+SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
 FROM (SELECT b.business_id AS business_id, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
   FROM BusinessStatic AS b, ReviewStatic AS r
   WHERE b.business_id == r.business_id
