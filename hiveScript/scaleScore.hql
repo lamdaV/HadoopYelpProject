@@ -39,7 +39,6 @@ from BusinessStatic as b join  temp_review as r on b.business_id = r.business_id
 -- where business_id == 'iHmfkYeEsIxbAqEj3dloQQ'
 -- 	and review_time IS NOT NULL;
 
-#!/bin/bash
 drop table if exists csv_dump;
 create table csv_dump ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' LOCATION '/tmp/aggregate' as select * from temp_business;
 
