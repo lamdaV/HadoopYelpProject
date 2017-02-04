@@ -6,7 +6,7 @@
   - [x] Feature 1: We want to reaggregate the business’s review with an emphasis on the most recent reviews.
   - [ ] Feature 2: We want to find the average ratings for all the businesses in each city over a given time interval.
   - [ ] Feature 3: We want to find the highest rated business over a given time interval.
-  - [x] Feature 4: We want to find a leaderboard of active users within a given time interval.
+  - [ ] Feature 4: We want to find a leaderboard of active users within a given time interval.
   - [ ] Feature 5: We want, for the above two features, to specify specific features of the types of businesses to be analyzed (like distance from a location, city location, type of business, etc).
   - [x] Feature 6: We want to summarize large reviews with ~~500~~ 1000 characters or more with Sumy python library.
   - [x] Feature 7: We will write a MapReduce job to run a python process to execute Sumy summarizations.
