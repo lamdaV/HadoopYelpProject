@@ -9,10 +9,10 @@ desiredData = FOREACH yelp GENERATE
   (chararray) TRIM(json#'review_id') AS reviewID,
   (chararray) TRIM(json#'user_id') AS userID,
   (chararray) TRIM(json#'business_id') AS businessID,
-  (chararray) TRIM(json#'text') AS text,
+  REPLACE((chararray) TRIM(json#'text'), '\n', ' ') AS review,
   (double) TRIM(json#'stars') AS rating,
   (chararray) TRIM(json#'date') AS date;
 
-nonNullData = FILTER desiredData BY (reviewID IS NOT NULL AND userID IS NOT NULL AND businessID IS NOT NULL AND text IS NOT NULL AND rating IS NOT NULL AND date IS NOT NULL);
+nonNullData = FILTER desiredData BY (reviewID IS NOT NULL AND userID IS NOT NULL AND businessID IS NOT NULL AND review IS NOT NULL AND rating IS NOT NULL AND date IS NOT NULL);
 
 STORE nonNullData into '$output' using PigStorage('\t');
