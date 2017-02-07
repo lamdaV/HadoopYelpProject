@@ -14,4 +14,4 @@ SELECT TRANSFORM(review_id, review)
   USING 'python streamingSumy.py' as (review_id STRING, summary STRING)
 FROM ReviewStatic
 WHERE review IS NOT NULL
-  AND LENGTH(review) >= 1000
+  AND LENGTH(review) >= 1000;
