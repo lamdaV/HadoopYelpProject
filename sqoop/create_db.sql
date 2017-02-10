@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS Leaderboard (
   PRIMARY KEY (user_id)
 );
 
-CREATE TABLE IF NOT EXISTS ReaggreatedScore (
+CREATE TABLE IF NOT EXISTS ReaggregateScore (
   business_id VARCHAR(25) NOT NULL,
   score DECIMAL NOT NULL,
   FOREIGN KEY (business_id)
