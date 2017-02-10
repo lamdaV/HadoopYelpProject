@@ -51,22 +51,24 @@ Partitioned by
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS orc;
 
 
--- Create TABLE review
--- (
--- 	reviewID STRING,
---  	user_id STRING,
---  	text STRING,
---  	rating DOUBLE,
---  	review_time DATE
---  )
--- Partitioned by
--- (business_id STRING)
--- ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
--- STORED AS orc;
+Create TABLE review
+(
+	review_id STRING,
+ 	user_id STRING,
+ 	business_id STRING,
+ 	review STRING,
+ 	rating DOUBLE,
+ 	review_time DATE
+ )
+Partitioned by
+(state STRING,
+ city STRING)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
+STORED AS orc;
 
 set hive.exec.reducers.bytes.per.reducer=1000;
 Set hive.exec.dynamic.partition.mode=nonstrict;
 
 insert into TABLE business PARTITION(state, city) SELECT business_id, name, address, longitude, latitude, rating, ratingCount, state, city from businessstatic;
 
--- insert into TABLE review PARTITION(business_id) SELECT * from reviewstatic DISTRIBUTE BY business_id;
+insert into TABLE review PARTITION(state, city) select r.review_id, r.user_id, r.business_id, r.review, r.rating, r.review_time, b.state as state, b.city as city from reviewstatic r join business b on r.business_id = b.business_id order by r.review_time DESC;
