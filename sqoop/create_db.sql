@@ -37,3 +37,18 @@ CREATE TABLE IF NOT EXISTS ReviewSummary (
     ON UPDATE CASCADE
     ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS Leaderboard (
+  user_id VARCHAR(25) NOT NULL,
+  score INT NOT NULL,
+  PRIMARY KEY (user_id)
+);
+
+CREATE TABLE IF NOT EXISTS ReaggreatedScore (
+  business_id VARCHAR(25) NOT NULL,
+  score DECIMAL NOT NULL,
+  FOREIGN KEY (business_id)
+    REFERENCES Business(business_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);
