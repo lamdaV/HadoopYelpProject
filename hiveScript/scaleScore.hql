@@ -3,46 +3,52 @@ USE yelp;
 DROP FUNCTION IF EXISTS scaleReview;
 CREATE FUNCTION scaleReview AS 'edu.rosehulman.rad.ScaleReview' USING JAR 'hdfs:///tmp/jars/RADHiveUDF-0.0.1-SNAPSHOT.jar';
 
-CREATE TEMPORARY TABLE IF NOT EXISTS `yelp.temp_review` (business_id STRING, scaleScore DOUBLE)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS orc;
+DROP TABLE IF EXISTS weighted_business_scores;
 
-insert into TABLE `yelp.temp_review`
-SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
-FROM (SELECT b.business_id AS business_id, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
-  FROM BusinessStatic AS b, ReviewStatic AS r
-  WHERE b.business_id == r.business_id
-    AND r.review_time IS NOT NULL
-  ) AS scale_table
-WHERE scale_table.scale_score != -1
-GROUP BY scale_table.business_id;
+CREATE TABLE `yelp.weighted_business_scores` (business_id STRING, name STRING, city STRING, state STRING, scaleScore DOUBLE)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
 
 --select based on dates
-insert into TABLE `yelp.temp_review`
-SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
-FROM (SELECT b.business_id AS business_id, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
-  FROM BusinessStatic AS b, ReviewStatic AS r
-  WHERE b.business_id == r.business_id
+insert into TABLE `yelp.weighted_business_scores`
+SELECT scale_table.business_id, scale_table.name, scale_table.city, scale_table.state, AVG(scale_table.scale_score) AS scale_rating
+FROM (
+	SELECT b.business_id AS business_id, b.name, b.city, b.state, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
+  	FROM BusinessStatic AS b, ReviewStatic AS r
+  	WHERE b.business_id == r.business_id
     AND r.review_time IS NOT NULL
+    AND r.review_time BETWEEN ${hiveconf:start_time} AND ${hiveconf:end_time}
   ) AS scale_table
-WHERE scale_table.scale_score != -1 and r.reviews_time >= '2012-5-11' and r.review_time <= NOW()
-GROUP BY scale_table.business_id;
+WHERE scale_table.scale_score != -1 GROUP BY scale_table.business_id
+Order by scale_table.state ASC, scale_table.scaleScore DESC;
 
-CREATE TEMPORARY TABLE IF NOT EXISTS `yelp.temp_business` (business_id STRING, name STRING, city STRING, state STRING, scaleScore DOUBLE)
-ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
-STORED AS orc;
 
--- sort reviews by state, city then top reviews
-insert into TABLE `yelp.temp_business`
-SELECT b.business_id, b.name, b.city, b.state, r.scaleScore
-from BusinessStatic as b join  temp_review as r on b.business_id = r.business_id Order by b.state ASC, r.scaleScore DESC;
 
--- select scaleReview(rating, cast(review_time as string))
--- from ReviewStatic
--- where business_id == 'iHmfkYeEsIxbAqEj3dloQQ'
--- 	and review_time IS NOT NULL;
+-- drop table if exists csv_dump;
+-- create table csv_dump ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' LOCATION '/tmp/aggregate' as select * from temp_business;
 
-#!/bin/bash
-drop table if exists csv_dump;
-create table csv_dump ROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' LOCATION '/tmp/aggregate' as select * from temp_business;
+-- hadoop fs -getmerge /tmp/aggregate/ aggregate.csv
 
-hadoop fs -getmerge /tmp/aggregate/ aggregate.csv
+
+
+
+
+SELECT scale_table.business_id, scale_table.name, scale_table.city, scale_table.state, AVG(scale_table.scale_score) AS scale_rating
+ FROM (SELECT b.business_id AS business_id, b.name as name, b.city AS city, b.state AS state, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
+   FROM BusinessStatic AS b, ReviewStatic AS r
+   WHERE b.business_id == r.business_id
+     AND r.review_time IS NOT NULL 
+     AND r.review_time BETWEEN '2009-01-01' AND '2017-01-01' limit 1000
+   ) AS scale_table
+ WHERE scale_table.scale_score != -1
+ GROUP BY scale_table.business_id;
+
+
+ -- -insert into TABLE `yelp.temp_review`
+ -- -SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
+ -- -FROM (SELECT b.business_id AS business_id, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
+ -- -  FROM BusinessStatic AS b, ReviewStatic AS r
+ -- -  WHERE b.business_id == r.business_id
+ -- -    AND r.review_time IS NOT NULL
+ -- -  ) AS scale_table
+ -- -WHERE scale_table.scale_score != -1
+ -- -GROUP BY scale_table.business_id;
