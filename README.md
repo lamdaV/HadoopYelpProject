@@ -10,7 +10,7 @@
   - [x] Feature 5: We want, for the above two features, to specify specific features of the types of businesses to be analyzed (like distance from a location, city location, type of business, etc).
   - [x] Feature 6: We want to summarize large reviews with ~~500~~ 1000 characters or more with Sumy python library.
   - [x] Feature 7: We will write a MapReduce job to run a python process to execute Sumy summarizations.
-  - [x] Feature 8: Create dynamic rating for business every time it is reviewed, and the points declines every month. Then plot the business rating over a period of time using zeppelin notebook.
+  - [x] Feature 8: Create dynamic rating for business every time it is reviewed, and the rating declines every month. Then plot the business rating over a period of time using zeppelin notebook.
 
 ## Milestone:
 ### Milestone 01:
