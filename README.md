@@ -61,3 +61,8 @@
   - David:
     - [x] Determine where to export data (Hive MYSQL, Heroku Postgres, etc.)
     - [x] Start writing sqoop scripts to output to some database
+    
+### Milestone 05:
+   - Runzhi, Adam, David:
+    - [ ] Play with oozie, and see how it can work in our project.
+   
