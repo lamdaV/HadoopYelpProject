@@ -26,7 +26,7 @@
 ### Milestone 02:
   - Runzhi:
     - [x] Begin working with Hive reaggregation of review score.
-    - [ ] ~~Partition Tables properly.~~
+    - [ ] ~~Partition Tables properly.~~ (Moved to next Milestone due to bug encountered)
   - Adam:
     - [x] Begin working on feature 2: find the average ratings for all the businesses in each city over a given time interval.
   - David:
@@ -58,7 +58,7 @@
     - [x] New feature: add points for business every time it is reviewed, and the points declines every day.
   - Adam:
     - [x] Select business over a time interval, and plot its points chart.
-    - [ ] Start on feature 5: We want, for the above two features, to specify specific features of the types of businesses to be analyzed (like distance from a location, city location, type of business, etc).
+    - [x] Start on feature 5: We want, for the above two features, to specify specific features of the types of businesses to be analyzed (like distance from a location, city location, type of business, etc).
   - David:
     - [x] Determine where to export data (Hive MYSQL, Heroku Postgres, etc.)
     - [x] Start writing sqoop scripts to output to some database
