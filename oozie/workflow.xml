@@ -1,0 +1,96 @@
+<workflow-app name="YelpWorkflow" xmlns="uri:oozie:workflow:0.4">
+  <start to="Pig"/>
+  <action name="Pig">
+    <pig>
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <prepare>
+          <delete path="${pigOutputPath}/${year}-${month}-${day}"/>
+      </prepare>
+
+      <script>/tmp/shared/scripts/log.pig</script>
+      <param>input=${pigInputPath}</param>
+      <param>output=${pigOutputPath}</param>
+      <param>year=${year}</param>
+      <param>month=${month}</param>
+      <param>day=${day}</param>
+      <param>hour=${hour}</param>
+    </pig>
+    <ok to="HiveLoad"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="HiveLoad">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <jdbc-url>jdbc:hive2://hadoop-03.csse.rose-hulman.edu:10000</jdbc-url>
+      <password>${hivePassword}</password>
+
+      <script>/tmp/shared/scripts/create_static_table.hql</script>
+      <param>databaseName=${databaseName}</param>
+      <param>input=${pigOutputPath}/${year}-${month}-${day}</param>
+      <param>logStatic=${logStatic}</param>
+      <param>year=${year}</param>
+      <param>month=${month}</param>
+      <param>day=${day}</param>
+      <param>hour=${hour}</param>
+    </hive2>
+    <ok to="HiveDynamic"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="HiveDynamic">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <jdbc-url>jdbc:hive2://hadoop-03.csse.rose-hulman.edu:10000</jdbc-url>
+      <password>${hivePassword}</password>
+
+      <script>/tmp/shared/scripts/create_dynamic_table.hql</script>
+      <param>databaseName=${databaseName}</param>
+      <param>logStatic=${logStatic}</param>
+      <param>logData=${logData}</param>
+    </hive2>
+    <ok to="Export"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="Export">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${databaseName}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>${logStatic}</arg>
+      <arg>--hcatalog-partition-keys</arg>
+      <arg>year,month,day,hour</arg>
+      <arg>--hcatalog-partition-values</arg>
+      <arg>${year},${month},${day},${hour}</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="end"/>
+    <error to="kill"/>
+    </action>
+
+  <kill name="kill">
+    <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+  </kill>
+  <end name="end"/>
+</workflow-app>

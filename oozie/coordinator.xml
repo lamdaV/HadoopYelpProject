@@ -1,0 +1,14 @@
+<coordinator-app name="PopularScoreCoordinator" frequency="${coord:months(1)}"
+  start="2004-10-01T00:01Z" end="2017-02-01T00:01Z" timezone="America/Los_Angeles"
+  xmlns="uri:oozie:coordinator:0.2">
+  <action>
+    <workflow>
+      <app-path>${wf_application_path}</app-path>
+      <configuration>
+        <property>
+          <name>month_start</name>
+          <value>${coord:formatTime(coord:nominalTime(),'yyyy-MM-dd')}</value>
+        </property>
+   </workflow>
+  </action>
+</coordinator-app>
