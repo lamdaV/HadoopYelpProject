@@ -20,21 +20,21 @@ FROM (
   	FROM Business AS b, ReviewClean AS r
   	WHERE b.business_id == r.business_id
     AND r.review_time IS NOT NULL
-    AND r.review_time BETWEEN ${hiveconf:start_time} AND ${hiveconf:end_time}
+    AND r.review_time BETWEEN '2009-01-01' AND ${run_date}
   ) AS scale_table
 WHERE scale_table.scale_score != -1 GROUP BY scale_table.business_id
 Order by scale_table.state ASC, scale_table.scaleScore DESC;
 
 --select based on full time range
-INSERT into TABLE WeightedBusinessScore
-SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
-FROM (SELECT b.business_id AS business_id, b.name as name, b.city AS city, b.state AS state, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
-	FROM Business AS b, ReviewClean AS r
- 	WHERE b.business_id == r.business_id
-  	AND r.review_time IS NOT NULL
-   	AND r.review_time BETWEEN '2009-01-01' AND '2017-01-01'
-) AS scale_table
-WHERE scale_table.scale_score != -1
-GROUP BY scale_table.business_id;
-
-INSERT INTO TABLE WeightedBusinessScore SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating FROM ( SELECT b.business_id AS business_id, b.name AS name, b.city AS city, b.state AS state, scaleReview(r.rating, CAST(r.review_time AS STRING)) AS scale_score FROM Business AS b, ReviewClean AS r WHERE b.business_id == r.business_id AND r.review_time IS NOT NULL AND r.review_time BETWEEN '2009-01-01' AND '2017-01-01') AS scale_table WHERE scale_table.scale_score != -1 GROUP BY scale_table.business_id
+-- INSERT into TABLE WeightedBusinessScore
+-- SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating
+-- FROM (SELECT b.business_id AS business_id, b.name as name, b.city AS city, b.state AS state, scaleReview(r.rating, cast(r.review_time AS string)) AS scale_score
+-- 	FROM Business AS b, ReviewClean AS r
+--  	WHERE b.business_id == r.business_id
+--   	AND r.review_time IS NOT NULL
+--    	AND r.review_time BETWEEN '2009-01-01' AND '2017-01-01'
+-- ) AS scale_table
+-- WHERE scale_table.scale_score != -1
+-- GROUP BY scale_table.business_id;
+--
+-- INSERT INTO TABLE WeightedBusinessScore SELECT scale_table.business_id, AVG(scale_table.scale_score) AS scale_rating FROM ( SELECT b.business_id AS business_id, b.name AS name, b.city AS city, b.state AS state, scaleReview(r.rating, CAST(r.review_time AS STRING)) AS scale_score FROM Business AS b, ReviewClean AS r WHERE b.business_id == r.business_id AND r.review_time IS NOT NULL AND r.review_time BETWEEN '2009-01-01' AND '2017-01-01') AS scale_table WHERE scale_table.scale_score != -1 GROUP BY scale_table.business_id

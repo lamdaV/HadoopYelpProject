@@ -1,5 +1,5 @@
 <workflow-app name="YelpWorkflow" xmlns="uri:oozie:workflow:0.4">
-  <start to="PigCleanup"/>
+  <start to="HivePopularity"/>
   <action name="PigCleanup">
     <pig>
       <job-tracker>${jobTracker}</job-tracker>
@@ -55,8 +55,7 @@
 
       <script>/tmp/shared/scripts/scaleScore.hql</script>
       <param>databaseName=${hiveDatabase}</param>
-      <param>logStatic=${logStatic}</param>
-      <param>logData=${logData}</param>
+      <param>current_month=${current_month}</param>
     </hive2>
     <ok to="HivePopularity"/>
     <error to="kill"/>
@@ -74,6 +73,9 @@
       <script>/tmp/shared/scripts/calculateScoreRoutine.hql</script>
       <param>databaseName=${hiveDatabase}</param>
       <param>current_month=${current_month}</param>
+      <param>min_score=${min_score}</param>
+      <param>multiply_bonus=${multiply_bonus}</param>
+      <param>penalties=${penalties}</param>
     </hive2>
     <ok to="ExportPopularity"/>
     <error to="kill"/>
@@ -133,14 +135,64 @@
       <arg>-m</arg>
       <arg>4</arg>
       <arg>--table</arg>
-      <arg>${mysqlBusinessTable}</arg>
+      <arg>${mysqlReviewTable}</arg>
       <arg>--hcatalog-database</arg>
-      <arg>Review</arg>
+      <arg>${hiveDatabase}</arg>
       <arg>--hcatalog-table</arg>
-      <arg>
+      <arg>ReviewClean</arg>
       <arg>--skip-dist-cache</arg>
     </sqoop>
-    <ok to="end"/>
+    <ok to="ExportLeaderboard"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportLeaderboard">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlLeaderboardTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${hiveDatabase}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>Leaderboard</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="ExportReaggreatedScore"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportReaggregatedScore">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlReaggregateScoreTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${hiveDatabase}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>WeightedBusinessScore</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="ExportPopularity"/>
     <error to="kill"/>
   </action>
 
@@ -157,11 +209,15 @@
       <arg>-m</arg>
       <arg>4</arg>
       <arg>--table</arg>
-      <arg>${mysqlTable}</arg>
+      <arg>${mysqlPopularityTable}</arg>
       <arg>--hcatalog-database</arg>
       <arg>${hiveDatabase}</arg>
       <arg>--hcatalog-table</arg>
-      <arg>${hivePopTable}</arg>
+      <arg>${hivePopularityTable}</arg>
+      <arg>--hcatalog-partition-keys</arg>
+      <arg>year,month</arg>
+      <arg>--hcatalog-partition-values</arg>
+      <arg>${year},${month}</arg>
       <arg>--skip-dist-cache</arg>
     </sqoop>
     <ok to="end"/>
