@@ -6,9 +6,18 @@
       <app-path>${wf_application_path}</app-path>
       <configuration>
         <property>
-          <name>month_start</name>
+          <name>current_month</name>
           <value>${coord:formatTime(coord:nominalTime(),'yyyy-MM-dd')}</value>
         </property>
-   </workflow>
+        <property>
+          <name>year</name>
+          <value>${coord:formatTime(coord:nominalTime(),'yyyy')}</value>
+        </property>
+        <property>
+          <name>month</name>
+          <value>${coord:formatTime(coord:nominalTime(),'MM')}</value>
+        </property>
+      </configuration>
+    </workflow>
   </action>
 </coordinator-app>
