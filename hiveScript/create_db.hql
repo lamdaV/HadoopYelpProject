@@ -54,7 +54,6 @@ CREATE TABLE ReviewClean (review_id STRING, user_id STRING, business_id STRING, 
 
 INSERT INTO ReviewClean SELECT * FROM ReviewStatic where length(review_id) == 22 AND length(user_id) == 22 AND length(business_id) == 22 AND review IS NOT NULL AND rating IS NOT NULL AND review_time IS NOT NULL;
 
-
 Create TABLE review
 (
 	review_id STRING,
