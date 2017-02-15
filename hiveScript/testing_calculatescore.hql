@@ -19,8 +19,12 @@ CREATE TABLE IF NOT EXISTS PopularityScore(
     )
     ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TEXTFILE;
 
-INSERT INTO TABLE PopularityScore partition(score_year=${hiveconf:prev_year}, score_month=${hiveconf:prev_month})
-    SELECT tempTable.business_id, greatest(sum(tempTable.rating), ${hiveconf:min_score}), ${hiveconf:prev_date} as agg_time FROM
+set hive.exec.dynamic.partition.mode=nonstrict;
+
+INSERT INTO TABLE PopularityScore PARTITION(score_year, score_month)
+    SELECT tempTable.business_id, greatest(sum(tempTable.rating), ${hiveconf:min_score}), 
+            ${hiveconf:prev_date} as agg_time,${hiveconf:prev_year} as score_year, ${hiveconf:prev_month} as score_month 
+        FROM
         (SELECT business_id, PopularityScore.rating-${hiveconf:penalties} as rating
                 FROM PopularityScore
                 WHERE agg_time BETWEEN ${hiveconf:prev_prev_date} AND ${hiveconf:prev_date}
