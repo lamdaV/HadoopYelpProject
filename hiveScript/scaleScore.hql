@@ -1,11 +1,14 @@
-USE yelp;
+USE ${databaseName};
 
 DROP FUNCTION IF EXISTS scaleReview;
 CREATE FUNCTION scaleReview AS 'edu.rosehulman.rad.ScaleReview' USING JAR 'hdfs:///tmp/jars/RADHiveUDF-0.0.1-SNAPSHOT.jar';
 
 DROP TABLE IF EXISTS weighted_business_scores;
 
-CREATE TABLE IF NOT EXISTS WeightedBusinessScore (business_id STRING, scaleScore DOUBLE)
+CREATE TABLE IF NOT EXISTS WeightedBusinessScore (
+	business_id STRING,
+	scaleScore DOUBLE
+)
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
 STORED AS TEXTFILE;
 

@@ -1,5 +1,5 @@
 %default input '/tmp/yelp_dataset/yelp_academic_dataset_review.json'
-%default output '/tmp/pig/review'
+%default output '/tmp/pig'
 REGISTER 'hdfs:///tmp/jars/elephant-bird-core-4.1.jar';
 REGISTER 'hdfs:///tmp/jars/elephant-bird-hadoop-compat-4.1.jar';
 REGISTER 'hdfs:///tmp/jars/elephant-bird-pig-4.1.jar';
@@ -15,4 +15,4 @@ desiredData = FOREACH yelp GENERATE
 
 nonNullData = FILTER desiredData BY (reviewID IS NOT NULL AND userID IS NOT NULL AND businessID IS NOT NULL AND review IS NOT NULL AND rating IS NOT NULL AND date IS NOT NULL);
 
-STORE nonNullData into '$output' using PigStorage('\t');
+STORE nonNullData into '$output/review/$year-$month' using PigStorage('\t');

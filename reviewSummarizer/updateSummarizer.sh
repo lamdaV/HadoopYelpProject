@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 hadoop fs -put -f streamingSumy.py /tmp/reviewSummarizer
 
 scp streamingSumy.py root@hadoop-24:
