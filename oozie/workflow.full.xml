@@ -1,0 +1,246 @@
+<workflow-app name="YelpWorkflow" xmlns="uri:oozie:workflow:0.4">
+  <start to="HivePopularity"/>
+  <action name="PigCleanupBusiness">
+    <pig>
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <prepare>
+          <delete path="${pigOutputPath}/business/${year}-${month}" />
+          <delete path="${pigOutputPath}/review/${year}-${month}" />
+      </prepare>
+
+      <script>/tmp/shared/scripts/businessParser.pig</script>
+      <param>input=${pigInputPath}</param>
+      <param>output=${pigOutputPath}</param>
+      <param>year=${year}</param>
+      <param>month=${month}</param>
+    </pig>
+    <ok to="PigCleanupReview"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="PigCleanupReview">
+    <pig>
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <prepare>
+          <delete path="${pigOutputPath}/business/${year}-${month}" />
+          <delete path="${pigOutputPath}/review/${year}-${month}" />
+      </prepare>
+
+      <script>/tmp/shared/scripts/reviewParser.pig</script>
+      <param>input=${pigInputPath}</param>
+      <param>output=${pigOutputPath}</param>
+      <param>year=${year}</param>
+      <param>month=${month}</param>
+    </pig>
+    <ok to="HiveSetup"/>
+    <error to="kill"/>
+  </action>
+  <param>month=${month}</param>
+
+  <action name="HiveSetup">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <jdbc-url>jdbc:hive2://hadoop-03.csse.rose-hulman.edu:10000</jdbc-url>
+      <password>${hivePassword}</password>
+
+      <script>/tmp/shared/scripts/setup_hive.hql</script>
+      <param>databaseName=${hiveDatabase}</param>
+      <param>year=${year}</param>
+      <param>month=${month}</param>
+    </hive2>
+    <ok to="HiveScaleScore"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="HiveScaleScore">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <jdbc-url>jdbc:hive2://hadoop-03.csse.rose-hulman.edu:10000</jdbc-url>
+      <password>${hivePassword}</password>
+
+      <script>/tmp/shared/scripts/scaleScore.hql</script>
+      <param>databaseName=${hiveDatabase}</param>
+      <param>run_date=${run_date}</param>
+    </hive2>
+    <ok to="HivePopularity"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="HivePopularity">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <jdbc-url>jdbc:hive2://hadoop-03.csse.rose-hulman.edu:10000</jdbc-url>
+      <password>${hivePassword}</password>
+
+      <script>/tmp/shared/scripts/calculateScoreRoutine.hql</script>
+      <param>databaseName=${hiveDatabase}</param>
+      <param>run_date=${run_date}</param>
+      <param>min_score=${min_score}</param>
+      <param>multiply_bonus=${multiply_bonus}</param>
+      <param>penalties=${penalties}</param>
+    </hive2>
+    <ok to="ExportPopularity"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="HiveLeaderboard">
+    <hive2 xmlns="uri:oozie:hive2-action:0.1">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <jdbc-url>jdbc:hive2://hadoop-03.csse.rose-hulman.edu:10000</jdbc-url>
+      <password>${hivePassword}</password>
+
+      <script>/tmp/shared/scripts/leader_board.hql</script>
+      <param>databaseName=${hiveDatabase}</param>
+      <param>run_date=${run_date}</param>
+    </hive2>
+    <ok to="ExportBusiness"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportBusiness">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlBusinessTable}</arg>
+      <arg>--export-dir</arg>
+      <arg>${pigOutputPath}/business/${year}-${month}</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="ExportReview"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportReview">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlReviewTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${hiveDatabase}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>ReviewClean</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="ExportLeaderboard"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportLeaderboard">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlLeaderboardTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${hiveDatabase}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>Leaderboard</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="ExportReaggreatedScore"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportReaggregatedScore">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlReaggregateScoreTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${hiveDatabase}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>WeightedBusinessScore</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="ExportPopularity"/>
+    <error to="kill"/>
+  </action>
+
+  <action name="ExportPopularity">
+    <sqoop xmlns="uri:oozie:sqoop-action:0.2">
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <job-xml>/tmp/shared/hive-site.xml</job-xml>
+      <arg>export</arg>
+      <arg>--connect</arg>
+      <arg>jdbc:mysql://hadoop-03.csse.rose-hulman.edu:3306/${mysqlDatabase}</arg>
+      <arg>--username</arg>
+      <arg>root</arg>
+      <arg>-m</arg>
+      <arg>4</arg>
+      <arg>--table</arg>
+      <arg>${mysqlPopularityTable}</arg>
+      <arg>--hcatalog-database</arg>
+      <arg>${hiveDatabase}</arg>
+      <arg>--hcatalog-table</arg>
+      <arg>${hivePopularityTable}</arg>
+      <arg>--hcatalog-partition-keys</arg>
+      <arg>year,month</arg>
+      <arg>--hcatalog-partition-values</arg>
+      <arg>${year},${month}</arg>
+      <arg>--skip-dist-cache</arg>
+    </sqoop>
+    <ok to="end"/>
+    <error to="kill"/>
+  </action>
+
+  <kill name="kill">
+    <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+  </kill>
+  <end name="end"/>
+</workflow-app>

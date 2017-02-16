@@ -52,3 +52,15 @@ CREATE TABLE IF NOT EXISTS ReaggregateScore (
     ON UPDATE CASCADE
     ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS PopularityScore (
+  business_id varchar(25),
+  rating decimal,
+  agg_time date,
+  score_year varchar(4),
+  score_month varchar(3),
+  FOREIGN KEY (business_id)
+    REFERENCES Business(business_id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE
+);
